@@ -1,0 +1,119 @@
+THIS IS THE SQL CODE WHICH I WROTE TO CHECK MY SQL SKILLS 
+
+create database zepto_sql_project;
+use zepto_sql_project;
+create table Zepto(
+sku_id serial primary key,
+category varchar (120),
+name varchar(150) not null,
+mrp numeric (8,2),
+discountpercent numeric (5,2),
+availableQuantity integer,
+discountedsellingprice numeric (8,2),
+weightingms integer,
+outofstock boolean,
+qunatity integer
+); 
+
+-- data explroation 
+select * from zepto_v1;
+
+-- count the date 
+select count(*) from zepto_v1;
+
+-- product in stock & out of stock 
+select outofstock, count(sku_id)
+from zepto_v1
+group by outofstock;
+
+-- change or alter column name 
+aLTER TABLE `zepto_sql_project`.`zepto_v1`
+CHANGE COLUMN `ï»¿sku_id` `sku_id` INT;
+
+-- select product name present multiple time
+select name, count(sku_id) as no_of_sku_id
+from zepto_v1
+group by name 
+having count(sku_id) > 1
+order by count(sku_id) desc;
+
+-- data cleaning
+
+-- select where mrp is 0 
+select name, mrp from zepto_v1 
+where mrp = 0 and discountedsellingprice = 0;
+
+-- delete data where mrp is 0
+delete from zepto_v1
+where mrp = 0;
+
+-- convert paisa into rupess
+update zepto_v1
+set mrp = mrp/100.0,
+discountedsellingprice = discountedsellingprice/100.0;
+
+-- Q1 find the top 10 best-value products based on the discount percentage.
+select distinct name, discountpercent, mrp from zepto_v1
+order by discountpercent desc
+limit 10;
+
+-- Q2 what are the products with high mrp but out of stock.
+select distinct name, mrp, outofstock 
+from zepto_v1
+where outofstock = 'true' and mrp > 300
+order by mrp desc;
+
+-- Q3 calculate estimated revenue for each category.
+select category, 
+sum(discountedsellingprice*availablequantity) as revenue 
+from zepto_v1
+group by category
+order by revenue desc;
+
+-- Q4 find all the products where mrp is greater than 500 and discount is less than 10%.
+select distinct name, mrp, discountpercent
+from zepto_v1
+where mrp > 500 and discountpercent < '10%'
+order by discountpercent desc;
+
+-- Q5 identify the top 5 categorires offering the highest average discount percentage.
+select category, round(avg(discountpercent ),2 )as avg_dis_percent from zepto_v1
+group by category
+order by avg(discountpercent) desc
+limit 5;
+
+-- Q6 find the price per gram for products above 100g and sort by best value.
+select distinct name, weightingms, discountedsellingprice,
+round(discountedsellingprice/weightingms,2) as Price_per_gms
+from zepto_v1
+where weightingms >= 100
+order by price_per_gms;
+
+-- Q7 group the products into categories like low, medium, bulk.
+select distinct name, weightingms,
+case
+	when weightingms < 1000 then 'low'
+    when weightingms < 5000 then 'medium'
+    else 'bulk'
+    end as weight_category
+from zepto_v1
+order by weightingms desc ;
+
+-- Q8 what is the total inventory weight per category.
+select  category, 
+sum(weightingms * availableQuantity) as total_weight 
+from zepto_v1
+group by category
+order by total_weight desc;
+
+
+
+
+
+
+   
+
+
+
+
+
